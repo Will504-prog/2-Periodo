@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen">
+    <div class="w-1/4 h-full bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1633463012803-ffde1168e7c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80')">
+        <div class="p-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="flex-1 flex flex-col">
+        <div class="bg-teal-600 text-white p-4 flex justify-end relative">
+            <div class="flex items-center">
+                <span id="userIcon" class="mr-2 hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </span>
+                <span id="usernameDisplay" class="mr-2 hidden"></span>
+                <button id="loginBtn" class="hover:underline focus:outline-none">Login</button>
+                <div id="loginDropdown" class="hidden absolute right-0 top-12 mt-2 w-48 bg-teal-600 rounded-lg shadow-lg">
+                    <a href="#" id="professorLogin" class="block px-4 py-2 text-white hover:bg-teal-500 rounded-t-lg">Login como Professor</a>
+                    <a href="#" class="block px-4 py-2 text-white hover:bg-teal-500 rounded-b-lg">Login como Administrador</a>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 bg-[#F5F5DC] flex">
+            <div id="coursesSection" class="hidden w-1/4 p-6 bg-teal-600 rounded-lg text-white">
+                <button id="backBtnCourses" class="mb-4 text-white hover:underline">Voltar</button>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Cursos</h2>
+                    <button class="px-3 py-1 bg-teal-500 hover:bg-teal-700 rounded text-white">Filtrar</button>
+                </div>
+                <ul class="space-y-2">
+                    <li><button class="courseBtn w-full p-2 bg-teal-300 rounded text-white text-left" data-course="Curso 1">Curso 1</button></li>
+                    <li><button class="courseBtn w-full p-2 bg-teal-300 rounded text-white text-left" data-course="Curso 2">Curso 2</button></li>
+                    <li><button class="courseBtn w-full p-2 bg-teal-300 rounded text-white text-left" data-course="Curso 3">Curso 3</button></li>
+                    <li><button class="courseBtn w-full p-2 bg-teal-300 rounded text-white text-left" data-course="Curso 4">Curso 4</button></li>
+                </ul>
+            </div>
+            <div id="lessonsSection" class="hidden flex-1 p-6 bg-teal-600 rounded-lg text-white mx-4">
+                <h2 class="text-lg font-semibold mb-4">Gerar Faltas</h2>
+                <ul id="lessonsList" class="space-y-2"></ul>
+            </div>
+            <div class="w-1/4 p-6 bg-teal-600 rounded-lg text-white"></div>
+            <div id="professorForm" class="hidden absolute w-full max-w-md p-6 bg-teal-600 rounded-lg text-white">
+                <button id="backBtnForm" class="mb-4 text-white hover:underline">Voltar</button>
+                <h2 class="text-lg font-semibold mb-4">Login como Professor</h2>
+                <div class="mb-4">
+                    <label for="email" class="block mb-1">email :</label>
+                    <input type="email" id="email" class="w-full p-2 rounded bg-teal-300 text-white placeholder-white" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block mb-1">senha :</label>
+                    <input type="password" id="password" class="w-full p-2 rounded bg-teal-300 text-white placeholder-white" placeholder="">
+                </div>
+                <button id="submitLogin" class="w-full p-2 bg-teal-500 hover:bg-teal-700 rounded text-white">Entrar</button>
+            </div>
+            <div id="welcomeSection" class="hidden absolute w-full max-w-md p-6 bg-teal-600 rounded-lg text-white">
+                <button id="backBtnWelcome" class="mb-4 text-white hover:underline">Voltar</button>
+                <h2 id="welcomeMessage" class="text-lg font-semibold"></h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginBtn = document.getElementById('loginBtn');
+        const loginDropdown = document.getElementById('loginDropdown');
+        const professorLogin = document.getElementById('professorLogin');
+        const professorForm = document.getElementById('professorForm');
+        const backBtnForm = document.getElementById('backBtnForm');
+        const submitLogin = document.getElementById('submitLogin');
+        const welcomeSection = document.getElementById('welcomeSection');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const backBtnWelcome = document.getElementById('backBtnWelcome');
+        const coursesSection = document.getElementById('coursesSection');
+        const backBtnCourses = document.getElementById('backBtnCourses');
+        const lessonsSection = document.getElementById('lessonsSection');
+        const lessonsList = document.getElementById('lessonsList');
+        const emailInput = document.getElementById('email');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const userIcon = document.getElementById('userIcon');
+
+        const lessonsData = {
+            "Curso 1": ["aluno 1", "aluno 1", "aluno 1", "aluno 1", "aluno 1", "aluno 1", "aluno 1", "aluno 1"],
+            "Curso 2": ["aluno 2", "aluno 2", "aluno 2", "aluno 2"],
+            "Curso 3": ["aluno 3", "aluno 3", "aluno 3"],
+            "Curso 4": ["aluno 4", "aluno 4"]
+        };
+
+        loginBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loginDropdown.classList.toggle('hidden');
+        });
+
+        professorLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginDropdown.classList.add('hidden');
+            professorForm.classList.remove('hidden');
+            welcomeSection.classList.add('hidden');
+            coursesSection.classList.add('hidden');
+            lessonsSection.classList.add('hidden');
+        });
+
+        backBtnForm.addEventListener('click', () => {
+            professorForm.classList.add('hidden');
+        });
+
+        submitLogin.addEventListener('click', () => {
+            const email = emailInput.value;
+            const username = email.split('@')[0] || 'Usuário';
+            welcomeMessage.textContent = `Bem Vindo Professor ${username}`;
+            professorForm.classList.add('hidden');
+            welcomeSection.classList.remove('hidden');
+
+            setTimeout(() => {
+                welcomeSection.classList.add('hidden');
+                coursesSection.classList.remove('hidden');
+            }, 1000);
+
+            loginBtn.classList.add('hidden');
+            usernameDisplay.textContent = username;
+            usernameDisplay.classList.remove('hidden');
+            userIcon.classList.remove('hidden');
+        });
+
+        backBtnWelcome.addEventListener('click', () => {
+            welcomeSection.classList.add('hidden');
+            professorForm.classList.remove('hidden');
+            loginBtn.classList.remove('hidden');
+            usernameDisplay.classList.add('hidden');
+            userIcon.classList.add('hidden');
+        });
+
+        backBtnCourses.addEventListener('click', () => {
+            coursesSection.classList.add('hidden');
+            lessonsSection.classList.add('hidden');
+            professorForm.classList.remove('hidden');
+            loginBtn.classList.remove('hidden');
+            usernameDisplay.classList.add('hidden');
+            userIcon.classList.add('hidden');
+        });
+
+        document.querySelectorAll('.courseBtn').forEach(button => {
+            button.addEventListener('click', () => {
+                const course = button.getAttribute('data-course');
+                const lessons = lessonsData[course] || [];
+                lessonsList.innerHTML = lessons.map(lesson => <li class="p-2 bg-teal-300 rounded text-white">${lesson}</li>).join('');
+                lessonsSection.classList.remove('hidden');
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!loginBtn.contains(e.target) && !loginDropdown.contains(e.target)) {
+                loginDropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
