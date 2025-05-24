@@ -1,44 +1,71 @@
 
-# Compilador e flags
+# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2
-LDFLAGS = -lraylib -lm -lpthread -ldl -lGL -lopenal
-
-# Nomes dos arquivos
+CFLAGS = -Wall -Wextra -std=c11
+LDFLAGS = 
 TARGET = jogo
+
+# Source files
 SRC = jogo.c
+
+# Assets directory
 ASSETS_DIR = assets
-ASSETS = $(wildcard $(ASSETS_DIR)/*)
 
-# Diretórios de saída
-BUILD_DIR = build
-BIN_DIR = bin
+# Detect OS
+UNAME_S := $(shell uname -s)
 
-# Regra principal
-all: create_dirs $(BIN_DIR)/$(TARGET)
+# Debug vs. Release
+ifeq ($(DEBUG),1)
+    CFLAGS += -g -O0
+else
+    CFLAGS += -O2
+endif
 
-# Cria os diretórios necessários
-create_dirs:
-	@mkdir -p $(BUILD_DIR) $(BIN_DIR) $(ASSETS_DIR)
+# Raylib configuration
+ifeq ($(shell pkg-config --exists raylib && echo 1),1)
+    # Use pkg-config if available (recommended)
+    CFLAGS += $(shell pkg-config --cflags raylib)
+    LDFLAGS += $(shell pkg-config --libs raylib)
+else
+    # Platform-specific fallbacks
+    ifeq ($(UNAME_S),Darwin)
+        # macOS (Homebrew)
+        CFLAGS += -I/opt/homebrew/include
+        LDFLAGS += -L/opt/homebrew/lib -lraylib
+        LDFLAGS += -framework OpenGL -framework Cocoa -framework IOKit
+        LDFLAGS += -framework CoreAudio -framework CoreVideo
+    else ifeq ($(UNAME_S),Linux)
+        # Linux
+        LDFLAGS += -lraylib -lm -ldl -lpthread -lGL -lrt -lX11
+    else ifeq ($(UNAME_S),Windows_NT)
+        # Windows (MinGW)
+        LDFLAGS += -lraylib -lopengl32 -lgdi32 -lwinmm
+    endif
+endif
 
-# Compilação principal
-$(BIN_DIR)/$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
-	@cp -r $(ASSETS_DIR) $(BIN_DIR)/  # Copia assets para o diretório bin
+# Additional flags for all platforms
+LDFLAGS += -lopenal
 
-# Limpeza
+.PHONY: all clean run
+
+all: $(TARGET) copy_assets
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+copy_assets:
+	@mkdir -p $(ASSETS_DIR)
+	@cp -r $(ASSETS_DIR)/ $(TARGET)_assets/ || true
+
+run: $(TARGET) copy_assets
+	./$(TARGET)
+
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	rm -f $(TARGET)
+	rm -rf $(TARGET)_assets
 
-# Instalação (opcional)
 install: all
-	@echo "Instalando em /usr/local/games..."
+	@echo "Installing to /usr/local/games/$(TARGET)"
 	@sudo mkdir -p /usr/local/games/$(TARGET)
-	@sudo cp $(BIN_DIR)/$(TARGET) /usr/local/games/$(TARGET)/
-	@sudo cp -r $(BIN_DIR)/$(ASSETS_DIR) /usr/local/games/$(TARGET)/
-
-# Execução
-run: all
-	cd $(BIN_DIR) && ./$(TARGET)
-
-.PHONY: all clean install run create_dirs
+	@sudo cp $(TARGET) /usr/local/games/$(TARGET)/
+	@sudo cp -r $(ASSETS_DIR) /usr/local/games/$(TARGET)/ || true
