@@ -1,0 +1,44 @@
+
+# Compilador e flags
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99 -O2
+LDFLAGS = -lraylib -lm -lpthread -ldl -lGL -lopenal
+
+# Nomes dos arquivos
+TARGET = jogo
+SRC = jogo.c
+ASSETS_DIR = assets
+ASSETS = $(wildcard $(ASSETS_DIR)/*)
+
+# Diretórios de saída
+BUILD_DIR = build
+BIN_DIR = bin
+
+# Regra principal
+all: create_dirs $(BIN_DIR)/$(TARGET)
+
+# Cria os diretórios necessários
+create_dirs:
+	@mkdir -p $(BUILD_DIR) $(BIN_DIR) $(ASSETS_DIR)
+
+# Compilação principal
+$(BIN_DIR)/$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+	@cp -r $(ASSETS_DIR) $(BIN_DIR)/  # Copia assets para o diretório bin
+
+# Limpeza
+clean:
+	rm -rf $(BUILD_DIR) $(BIN_DIR)
+
+# Instalação (opcional)
+install: all
+	@echo "Instalando em /usr/local/games..."
+	@sudo mkdir -p /usr/local/games/$(TARGET)
+	@sudo cp $(BIN_DIR)/$(TARGET) /usr/local/games/$(TARGET)/
+	@sudo cp -r $(BIN_DIR)/$(ASSETS_DIR) /usr/local/games/$(TARGET)/
+
+# Execução
+run: all
+	cd $(BIN_DIR) && ./$(TARGET)
+
+.PHONY: all clean install run create_dirs
